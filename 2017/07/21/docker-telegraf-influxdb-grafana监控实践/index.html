@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-cn">
 <head>
-    <title>Using the gallery shortcode &middot; An0nymous</title>
+    <title>docker&#43;telegraf&#43;influxdb&#43;grafana监控实践 &middot; An0nymous</title>
     <meta name="generator" content="Hugo 0.25.1" />
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -10,7 +10,7 @@
       <meta name="description" content="">
     
     
-    <link rel="canonical" href="https://an0nymous0.github.io/2017/05/20/using-the-gallery-shortcode/"/>
+    <link rel="canonical" href="https://an0nymous0.github.io/2017/07/21/docker-telegraf-influxdb-grafana%E7%9B%91%E6%8E%A7%E5%AE%9E%E8%B7%B5/"/>
     <link rel="icon" href="https://an0nymous0.github.io/favicon.ico">
     <link rel="apple-touch-icon" href="https://an0nymous0.github.io/apple-touch-icon.png"/>
     <link rel="stylesheet" href="https://an0nymous0.github.io/css/style.css">
@@ -20,17 +20,15 @@
     
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,400,600' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Source+Code+Pro' rel='stylesheet' type='text/css'>
-    <meta property="og:title" content="Using the gallery shortcode" />
-<meta property="og:description" content="This way you can easily include a gallery into your page. Copy the code below into your content file and enter the relative paths to your images.
-
-" />
+    <meta property="og:title" content="docker&#43;telegraf&#43;influxdb&#43;grafana监控实践" />
+<meta property="og:description" content="" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://an0nymous0.github.io/2017/05/20/using-the-gallery-shortcode/" />
+<meta property="og:url" content="https://an0nymous0.github.io/2017/07/21/docker-telegraf-influxdb-grafana%E7%9B%91%E6%8E%A7%E5%AE%9E%E8%B7%B5/" />
 
 
 
-<meta property="article:published_time" content="2017-05-20T12:00:23&#43;02:00"/>
-<meta property="article:modified_time" content="2017-05-20T12:00:23&#43;02:00"/>
+<meta property="article:published_time" content="2017-07-21T13:20:09&#43;00:00"/>
+<meta property="article:modified_time" content="2017-07-21T13:20:09&#43;00:00"/>
 
 
 
@@ -44,14 +42,12 @@
 
     
     
-<meta itemprop="name" content="Using the gallery shortcode">
-<meta itemprop="description" content="This way you can easily include a gallery into your page. Copy the code below into your content file and enter the relative paths to your images.
-
-">
+<meta itemprop="name" content="docker&#43;telegraf&#43;influxdb&#43;grafana监控实践">
+<meta itemprop="description" content="">
 
 
-<meta itemprop="dateModified" content="2017-05-20T12:00:23&#43;02:00" />
-<meta itemprop="wordCount" content="33">
+<meta itemprop="dateModified" content="2017-07-21T13:20:09&#43;00:00" />
+<meta itemprop="wordCount" content="204">
 
 
 
@@ -63,11 +59,9 @@
 
 
 
-<meta name="twitter:text:title" content="Using the gallery shortcode"/>
-<meta name="twitter:title" content="Using the gallery shortcode"/>
-<meta name="twitter:description" content="This way you can easily include a gallery into your page. Copy the code below into your content file and enter the relative paths to your images.
-
-"/>
+<meta name="twitter:text:title" content="docker&#43;telegraf&#43;influxdb&#43;grafana监控实践"/>
+<meta name="twitter:title" content="docker&#43;telegraf&#43;influxdb&#43;grafana监控实践"/>
+<meta name="twitter:description" content=""/>
 <meta name="twitter:site" content="@ro0tsh3ll"/>
 
     
@@ -285,9 +279,9 @@
         
 
         <header class="article-header">
-    <a href="https://an0nymous0.github.io/2017/05/20/using-the-gallery-shortcode/">
+    <a href="https://an0nymous0.github.io/2017/07/21/docker-telegraf-influxdb-grafana%E7%9B%91%E6%8E%A7%E5%AE%9E%E8%B7%B5/">
     <h1 class="article-title" itemprop="name">
-        Using the gallery shortcode
+        docker&#43;telegraf&#43;influxdb&#43;grafana监控实践
     </h1>
     </a>
     <div class="article-meta">
@@ -295,9 +289,9 @@
         
         <div class="article-date">
             <i class="fa fa-calendar"></i>
-            <time datetime="2017-05-20 12:00:23 &#43;0200 &#43;0200" itemprop="datePublished">2017-05-20</time>
+            <time datetime="2017-07-21 13:20:09 &#43;0000 UTC" itemprop="datePublished">2017-07-21</time>
             &middot;
-            33
+            204
             words
             &middot;
             1
@@ -317,44 +311,199 @@
 </header>
 
         <div class="article-entry" itemprop="articleBody">
-            <p>This way you can easily include a gallery into your page. Copy the code below into your content file and enter the relative paths to your images.</p>
+            <p>
+服务监控是运维中必不可少的一部分，下面来教大家搭建出一款高效灵活并且颜值高的监控系统，所有服务会用docker搭建。</p>
 
-<p></p>
+<p>先简单对各个服务简单介绍以及是如何配合输出监控数据：</p>
 
-<pre><code>{{&lt; gallery
-    &quot;/banners/placeholder.png&quot;
-    &quot;/banners/placeholder.png&quot;
-    &quot;/banners/placeholder.png&quot;
-&gt;}}
+<p>Telegraf &gt; InfluxDB &gt; Grafana 对应 采集 &gt; 存储 &gt; 显示</p>
+
+<p>1.Telefraf
+&gt; Telefraf是Go语言编写的信息采集代理，负责把监控信息数据收集、处理、汇总和写入到指定存储中，本文中就是利用Telefraf把需要监控的数据采集到InfluxDB中。</p>
+
+<p>2.InfluxDB
+&gt; InfluxDB是Go语言编写的一个开源分布式时序、事件和指标数据库，负责收集监控数据，提供了类似sql的数据库语句帮助方便查询要展示的数据。</p>
+
+<p>3.Grafana
+&gt; Grafana是一个开源的指标量监测和可视化工具。常用于展示基础设施的时序数据和应用程序运行分析。在本示例中用于展示InfluxDB中的数据。</p>
+
+<h3 id="安装">安装</h3>
+
+<p>下面安装过程都是基于docker，关于docker安装过程请大家自行百度</br></p>
+
+<p><strong>注意</strong></br>
+docker实例中的时区会差8个小时别忘记改时区，先进入docker实例，在实例中执行。</p>
+
+<pre><code>RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime &amp;&amp; \ 
+    echo 'Asia/Shanghai' &gt;/etc/timezone
 </code></pre>
 
-<p></p>
+<h2 id="influxdb-https-www-influxdata-com">InfluxDB（<a href="https://www.influxdata.com/）">https://www.influxdata.com/）</a></h2>
 
+<p>安装：</p>
+
+<pre><code>docker run --name study-grafana-influxdb -p 8083:8083 -p 2003:2003 -p 8086:8086 -v /home/data/dockerwork/study-grafana-influxdb/data:/var/lib/influxdb -d influxdb
+</code></pre>
+
+<p>用docker启动我们的InfluxDB，并且映射出8083 2003 8086端口，同时把influxdb中的数据文件映射到本机存储。</p>
+
+<p>创建空数据库：</p>
+
+<pre><code>curl -i -XPOST http://localhost:8086/query --data-urlencode &quot;q=CREATE DATABASE telegraf&quot;
+</code></pre>
+
+<p>当然也可以用客户端操作，文档地址：<a href="https://docs.influxdata.com/influxdb/v1.3/introduction/getting_started/">https://docs.influxdata.com/influxdb/v1.3/introduction/getting_started/</a></p>
+
+<p>这样我们的数据库是算搭建完成了。</p>
+
+<h2 id="grafana-https-github-com-grafana-grafana">Grafana （<a href="https://github.com/grafana/grafana）">https://github.com/grafana/grafana）</a></h2>
+
+<p>安装：</p>
+
+<pre><code>docker run --name study-grafana -v /home/data/dockerwork/study-grafana:/var/lib/grafana -p 3000:3000 -d grafana/grafana:latest
+</code></pre>
+
+<p>映射出3000端口，并且把需要存在本地的数据盘从docker中映射给本地</p>
+
+<p>配置：</p>
+
+<p>1.登录我们的Grafana：<a href="http://localhost:3000/，默认帐号密码admin,admin。">http://localhost:3000/，默认帐号密码admin,admin。</a></p>
+
+<p>2.进入Data Sources 点击 Add data source
 <div class="article-gallery">
     <div class="article-gallery-photos">
         
-        <a class="article-gallery-img fancybox" href="/banners/placeholder.png" rel="group1">
-            <img src="https://an0nymous0.github.io/banners/placeholder.png" itemprop="image">
+        <a class="article-gallery-img fancybox" href="/images/5E697DE2-CECF-44E9-85F3-FCE3528A2F8D.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/5E697DE2-CECF-44E9-85F3-FCE3528A2F8D.png" itemprop="image">
         </a>
         
-        <a class="article-gallery-img fancybox" href="/banners/placeholder.png" rel="group1">
-            <img src="https://an0nymous0.github.io/banners/placeholder.png" itemprop="image">
+        <a class="article-gallery-img fancybox" href="/images/5E697DE2-CECF-44E9-85F3-FCE3528A2F8D.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/5E697DE2-CECF-44E9-85F3-FCE3528A2F8D.png" itemprop="image">
         </a>
         
-        <a class="article-gallery-img fancybox" href="/banners/placeholder.png" rel="group1">
-            <img src="https://an0nymous0.github.io/banners/placeholder.png" itemprop="image">
+        <a class="article-gallery-img fancybox" href="/images/5E697DE2-CECF-44E9-85F3-FCE3528A2F8D.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/5E697DE2-CECF-44E9-85F3-FCE3528A2F8D.png" itemprop="image">
         </a>
         
     </div>
 </div>
+</p>
+
+<p>3.设置数据库用于采集展示
+<div class="article-gallery">
+    <div class="article-gallery-photos">
+        
+        <a class="article-gallery-img fancybox" href="/images/C759A64A-19B8-4608-9014-74F8DF8CB030.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/C759A64A-19B8-4608-9014-74F8DF8CB030.png" itemprop="image">
+        </a>
+        
+        <a class="article-gallery-img fancybox" href="/images/C759A64A-19B8-4608-9014-74F8DF8CB030.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/C759A64A-19B8-4608-9014-74F8DF8CB030.png" itemprop="image">
+        </a>
+        
+        <a class="article-gallery-img fancybox" href="/images/C759A64A-19B8-4608-9014-74F8DF8CB030.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/C759A64A-19B8-4608-9014-74F8DF8CB030.png" itemprop="image">
+        </a>
+        
+    </div>
+</div>
+
+如上图设置点击保存</p>
+
+<p>Grafana 已经配置完一半了，虽然连接了数据库但是我们还没有要展示的数据，所以我们下一步要安装Telefraf采集数据，到InfluxDB中，最后通过Grafana展示采集过来的数据。</p>
+
+<h2 id="telefraf-https-github-com-influxdata-telegraf">Telefraf（<a href="https://github.com/influxdata/telegraf）">https://github.com/influxdata/telegraf）</a></h2>
+
+<p>1.下载
+<a href="https://github.com/influxdata/telegraf/releases">https://github.com/influxdata/telegraf/releases</a></p>
+
+<p>2.安装</p>
+
+<p><code>yum localinstall telegraf-1.3.4-1.x86_64.rpm</code></p>
+
+<p>3.配置</p>
+
+<p><code>vi /etc/telegraf/telegraf.conf</code></p>
+
+<p>找到  [[outputs.influxdb]] 标记修改urls以及database，如下：</p>
+
+<pre><code>[[outputs.influxdb]]
+  ## The HTTP or UDP URL for your InfluxDB instance.  Each item should be
+  ## of the form:
+  ##   scheme &quot;://&quot; host [ &quot;:&quot; port]
+  ##
+  ## Multiple urls can be specified as part of the same cluster,
+  ## this means that only ONE of the urls will be written to each interval.
+  # urls = [&quot;udp://localhost:8089&quot;] # UDP endpoint example
+  urls = [&quot;http://localhost:8086&quot;] # required
+  ## The target database for metrics (telegraf will create it if not exists).
+  database = &quot;telegraf&quot; # required
+</code></pre>
+
+<p>因为telegraf默认是开启了一些基础监控的 比如cpu 内存等
+所以我们暂不配置其他监控采集信息，配置完数据库配置直接保存:wq。</p>
+
+<p>4.启动
+<code>
+systemctl start telegraf
+</code></p>
+
+<p>至此我们的Telefraf安装以及Telefraf基础配置已经完成</p>
+
+<h2 id="通过grafana展示监控数据">通过Grafana展示监控数据</h2>
+
+<p>之前我们已经配置了Telefraf并且采集到了InfluxDB中，接下来需要完成我们的最后一步工作，通过Grafana展示数据。</p>
+
+<p>1.增加一个新的dashboard，并选择Graph</p>
+
+<p>2.配置我们的采集数据
+<div class="article-gallery">
+    <div class="article-gallery-photos">
+        
+        <a class="article-gallery-img fancybox" href="/images/4CAFDD34-76E5-4829-A2B2-7A55ADA52716.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/4CAFDD34-76E5-4829-A2B2-7A55ADA52716.png" itemprop="image">
+        </a>
+        
+        <a class="article-gallery-img fancybox" href="/images/4CAFDD34-76E5-4829-A2B2-7A55ADA52716.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/4CAFDD34-76E5-4829-A2B2-7A55ADA52716.png" itemprop="image">
+        </a>
+        
+        <a class="article-gallery-img fancybox" href="/images/4CAFDD34-76E5-4829-A2B2-7A55ADA52716.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/4CAFDD34-76E5-4829-A2B2-7A55ADA52716.png" itemprop="image">
+        </a>
+        
+    </div>
+</div>
+
+上图配置的采集系统的负载信息，具体的其他配置请大家参考Metrics配置的用法以及Telefraf的github官网参考可以采集的数据。</p>
+
+<p>最终上一张效果图
+<div class="article-gallery">
+    <div class="article-gallery-photos">
+        
+        <a class="article-gallery-img fancybox" href="/images/D1DCE6D6-A003-48F1-8840-FA34B0149893.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/D1DCE6D6-A003-48F1-8840-FA34B0149893.png" itemprop="image">
+        </a>
+        
+        <a class="article-gallery-img fancybox" href="/images/D1DCE6D6-A003-48F1-8840-FA34B0149893.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/D1DCE6D6-A003-48F1-8840-FA34B0149893.png" itemprop="image">
+        </a>
+        
+        <a class="article-gallery-img fancybox" href="/images/D1DCE6D6-A003-48F1-8840-FA34B0149893.png" rel="group1">
+            <img src="https://an0nymous0.github.io/images/D1DCE6D6-A003-48F1-8840-FA34B0149893.png" itemprop="image">
+        </a>
+        
+    </div>
+</div>
+</p>
         </div>
         <footer class="article-footer">
-    <a data-url="https://an0nymous0.github.io/2017/05/20/using-the-gallery-shortcode/" data-id="b5878041fdfd74bbf2f0b2b55108eb61" class="article-share-link">
+    <a data-url="https://an0nymous0.github.io/2017/07/21/docker-telegraf-influxdb-grafana%E7%9B%91%E6%8E%A7%E5%AE%9E%E8%B7%B5/" data-id="e5299914720d82bbf79cc8da268258b1" class="article-share-link">
         <i class="fa fa-share"></i>
         Share
     </a>
     
-    <a href="https://an0nymous0.github.io/2017/05/20/using-the-gallery-shortcode/#disqus_thread" class="article-comment-link">
+    <a href="https://an0nymous0.github.io/2017/07/21/docker-telegraf-influxdb-grafana%E7%9B%91%E6%8E%A7%E5%AE%9E%E8%B7%B5/#disqus_thread" class="article-comment-link">
         Comments
     </a>
     
@@ -430,21 +579,14 @@
     
 <nav id="article-nav">
     
-    <a href="https://an0nymous0.github.io/2017/05/20/formulas-with-mathjax/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="https://an0nymous0.github.io/2017/06/12/good-to-great/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">
           Older
       </strong>
-      <div class="article-nav-title">Formulas with MathJax</div>
+      <div class="article-nav-title">good to great</div>
     </a>
     
 
-    
-    <a href="https://an0nymous0.github.io/2017/05/20/markdown-cheat-sheet/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">
-          Newer
-      </strong>
-      <div class="article-nav-title">Markdown Cheat Sheet</div>
-    </a>
     
 </nav>
 
